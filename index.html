@@ -6,9 +6,22 @@
   <meta name="theme-color" content="#08111f">
   <title>RACE 100Q8｜興櫃五檔策略雷達</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="private.css">
 </head>
-<body>
+<body class="locked">
   <div class="noise"></div>
+  <section id="lock-screen" class="lock-screen">
+    <form id="unlock-form" class="lock-card">
+      <div class="lock-mark">Q8</div>
+      <p class="eyebrow">PRIVATE STRATEGY ACCESS</p>
+      <h1>100Q8 策略研究室</h1>
+      <p>輸入密碼以查看紙上帳戶、個股與分點評分。</p>
+      <label for="site-password">存取密碼</label>
+      <div class="password-row"><input id="site-password" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••••••" required><button type="submit">解鎖</button></div>
+      <div id="lock-error" class="lock-error" role="alert"></div>
+      <small>靜態研究頁面 · 不構成投資建議</small>
+    </form>
+  </section>
   <header class="topbar">
     <a class="brand" href="#overview"><span class="brand-mark">Q8</span><span>RACE <b>100Q8</b></span></a>
     <nav>
@@ -36,7 +49,9 @@
 
     <section id="stocks" class="view">
       <div class="page-title"><div><span class="kicker">STOCK TRACKER</span><h1>股票追蹤</h1><p>搜尋代號或名稱，查看策略、總分、共同建倉分點與9359確認狀態。</p></div><input id="stock-search" type="search" placeholder="搜尋股票代號或名稱…"></div>
-      <div id="stock-grid" class="stock-grid"></div>
+      <div class="holding-section"><div class="section-label"><span>P19</span><h2>訊號日資金加分持倉</h2><b id="p19-count"></b></div><div id="p19-stock-grid" class="stock-grid"></div></div>
+      <div class="holding-section"><div class="section-label"><span>P35</span><h2>9359後續確認持倉</h2><b id="p35-count"></b></div><div id="p35-stock-grid" class="stock-grid"></div></div>
+      <div class="holding-section common-section"><div class="section-label"><span>OVERLAP</span><h2>兩策略共同持有</h2><b id="common-count"></b></div><div id="common-stock-grid" class="stock-grid"></div></div>
     </section>
 
     <section id="brokers" class="view">
