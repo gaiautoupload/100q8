@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08111f">
+  <title>RACE 100Q8｜興櫃五檔策略雷達</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#overview"><span class="brand-mark">Q8</span><span>RACE <b>100Q8</b></span></a>
+    <nav>
+      <button data-view="overview" class="active">策略總覽</button>
+      <button data-view="stocks">股票追蹤</button>
+      <button data-view="brokers">分點排行</button>
+      <button data-view="method">評分方法</button>
+    </nav>
+    <div class="asof"><span class="pulse"></span><span id="asof">載入中</span></div>
+  </header>
+
+  <main>
+    <section id="overview" class="view active">
+      <div class="hero">
+        <div><p class="eyebrow">EMERGING MARKET INTELLIGENCE</p><h1>先找共同新建倉，<br><em>再等資金確認。</em></h1><p class="lede">兩套30萬元紙上帳戶，追蹤RACE共同新建倉與9359資金訊號。歷史模型、紙上決策與真正新訊號分開呈現。</p></div>
+        <div class="hero-orbit"><div class="orbit o1"></div><div class="orbit o2"></div><div class="core"><span>9359</span><small>資金確認</small></div></div>
+      </div>
+      <div id="status-banner" class="banner"></div>
+      <div id="strategy-cards" class="strategy-grid"></div>
+      <div class="grid two">
+        <article class="panel"><div class="panel-head"><div><span class="kicker">CURRENT MODEL</span><h2>目前模型持股</h2></div><span class="tag muted">觀察用・禁止追價</span></div><div id="overview-holdings"></div></article>
+        <article class="panel"><div class="panel-head"><div><span class="kicker">RESEARCH SIGNAL</span><h2>策略關係</h2></div></div><div class="flow"><div><b>共同新建倉</b><small>至少2個合格分點</small></div><i>→</i><div><b>P19</b><small>訊號日直接評分</small></div><i>／</i><div><b>P35</b><small>後1–5日等9359</small></div><i>→</i><div><b>T+1</b><small>容量合格才成交</small></div></div><div class="notice">P40「第一日快速確認」只作研究標籤，樣本不足，不配置獨立帳戶。</div></article>
+      </div>
+    </section>
+
+    <section id="stocks" class="view">
+      <div class="page-title"><div><span class="kicker">STOCK TRACKER</span><h1>股票追蹤</h1><p>搜尋代號或名稱，查看策略、總分、共同建倉分點與9359確認狀態。</p></div><input id="stock-search" type="search" placeholder="搜尋股票代號或名稱…"></div>
+      <div id="stock-grid" class="stock-grid"></div>
+    </section>
+
+    <section id="brokers" class="view">
+      <div class="page-title"><div><span class="kicker">POINT-IN-TIME RANK</span><h1>分點能力排行</h1><p>排名只使用當時已成熟事件；今天的高手不會回頭改寫歷史。</p></div><input id="broker-search" type="search" placeholder="搜尋分點代號或名稱…"></div>
+      <div id="featured-brokers" class="strategy-grid featured"></div>
+      <div class="legend"><span><i class="dot tier1"></i>權重1.0</span><span><i class="dot tier2"></i>0.8</span><span><i class="dot tier3"></i>0.6</span><span><i class="dot tier4"></i>0.4</span><span><i class="dot tier5"></i>0.2</span></div>
+      <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>排名</th><th>分點</th><th>權重</th><th>能力分數</th><th>縮減勝率</th><th>成熟樣本</th><th>歷史報酬分數</th></tr></thead><tbody id="broker-rows"></tbody></table></div></article>
+    </section>
+
+    <section id="method" class="view">
+      <div class="page-title"><div><span class="kicker">AUDITABLE METHOD</span><h1>分數如何形成</h1><p>每一分都有來源；資料不足、研究限制與成交假設一併揭露。</p></div></div>
+      <div id="formula-grid" class="formula-grid"></div>
+      <div class="grid two">
+        <article class="panel"><div class="panel-head"><h2>分點能力分數</h2></div><div class="equation">60% × 報酬百分位<br><span>＋</span> 40% × 勝率百分位</div><p class="copy">平均報酬使用樣本數＋20縮減；勝率加入2勝2敗先驗。至少10個成熟事件、5檔股票才有資格排名。分點排名每5個市場交易日更新，下一交易日生效。</p></article>
+        <article class="panel"><div class="panel-head"><h2>9359加分階梯</h2></div><div id="money-tiers" class="money-tiers"></div><p class="copy">P35的後續確認只要求淨買轉正，不設大額門檻。9359是券商分點彙總，不代表單一投資人。</p></article>
+      </div>
+      <article class="panel audit"><div class="panel-head"><h2>資料與限制</h2><span class="tag warn">探索研究</span></div><ul id="limitations"></ul></article>
+    </section>
+  </main>
+  <footer><span>100Q8 · RACE Emerging Five</span><span>靜態研究儀表板，不構成投資建議</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
