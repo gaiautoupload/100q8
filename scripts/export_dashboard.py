@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse,csv,json
 from pathlib import Path
+from datetime import date
 
 def rows(path):
     with path.open(encoding='utf-8-sig',newline='') as f:return list(csv.DictReader(f))
@@ -29,14 +30,21 @@ def main():
         s=load(base/code/'summary.json');annual=rows(base/code/'annual.csv');s['annualized_pct']=float(annual[-1]['return_pct']);summaries[code]=s
     win={'P19':46.1538461538,'P35':56.25,'P40':100.0}
     strategies=[{'code':c,'name':desc[c][0],'rule':desc[c][1],'status':desc[c][2],'return_pct':summaries[c]['return_pct'],'annualized_pct':summaries[c]['annualized_pct'],'max_drawdown_pct':summaries[c]['max_drawdown_pct'],'win_rate_pct':win[c],'ending_equity':summaries[c]['ending_equity']} for c in ('P19','P35','P40')]
-    watch=rows(a.lab/'paper_etf_dual'/'model_watchlist.csv');event_rows={x['id']:x for x in rows(stage3/'events.csv')};stocks={};strategy_holdings={'P19':[],'P35':[]}
+    watch=rows(a.lab/'paper_etf_dual'/'model_watchlist.csv');event_rows={x['id']:x for x in rows(stage3/'events.csv')};stocks={};strategy_holdings={'P19':[],'P35':[]};holding_age={}
+    for plan in ('P19','P35'):
+        history=rows(stage3/plan/'holdings.csv');plan_asof=max(x['date'] for x in history)
+        for current in (x for x in history if x['date']==plan_asof):
+            episode=[x for x in history if x['stock']==current['stock'] and x['entry_index']==current['entry_index']]
+            entry_date=min(x['date'] for x in episode);sessions=len({x['date'] for x in episode})
+            holding_age[(plan,current['stock'])]={'entry_date':entry_date,'holding_sessions':sessions,'holding_calendar_days':(date.fromisoformat(plan_asof)-date.fromisoformat(entry_date)).days+1}
     for w in watch:
         code=w['stock'];event=next((e for e in event_rows.values() if e['stock']==code and e['date']==w['source_signal']),None) or {}
         item=stocks.setdefault(code,{'stock':code,'name':clean_name(companies.get(code),code),'plans':[],'score':float(w['score'] or 0),'market_value':0.,'signal_date':w['source_signal'],'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') else None,'brokers':[]})
         item['plans'].append(w['plan']);item['market_value']+=float(w['historical_model_shares'])*float(w['mark']);item['score']=max(item['score'],float(w['score'] or 0))
         if event.get('brokers'):
             item['brokers']=[{'code':b,'name':clean_name(names.get(b),'分點 '+b),'weight':v} for b,v in json.loads(event['brokers']).items()]
-        strategy_holdings[w['plan']].append({'plan':w['plan'],'stock':code,'name':clean_name(companies.get(code),code),'score':float(w['score'] or 0),'shares':float(w['historical_model_shares']),'mark':float(w['mark']),'market_value':float(w['historical_model_shares'])*float(w['mark']),'signal_date':w['source_signal'],'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') else None,'brokers':item['brokers']})
+        age=holding_age.get((w['plan'],code),{})
+        strategy_holdings[w['plan']].append({'plan':w['plan'],'stock':code,'name':clean_name(companies.get(code),code),'score':float(w['score'] or 0),'shares':float(w['historical_model_shares']),'mark':float(w['mark']),'market_value':float(w['historical_model_shares'])*float(w['mark']),'signal_date':w['source_signal'],'entry_date':age.get('entry_date'),'holding_sessions':age.get('holding_sessions',0),'holding_calendar_days':age.get('holding_calendar_days',0),'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') else None,'brokers':item['brokers']})
     ranks=rows(stage4/'rank_history.csv');latest=max(x['effective_date'] for x in ranks if x['effective_date']);brokers=[]
     for x in ranks:
         if x['effective_date']!=latest:continue
