@@ -30,14 +30,14 @@ def main():
         s=load(base/code/'summary.json');annual=rows(base/code/'annual.csv');s['annualized_pct']=float(annual[-1]['return_pct']);summaries[code]=s
     win={'P19':46.1538461538,'P35':56.25,'P40':100.0};closed={'P19':39,'P35':16,'P40':6}
     strategies=[{'code':c,'name':desc[c][0],'rule':desc[c][1],'status':desc[c][2],'return_pct':summaries[c]['return_pct'],'annualized_pct':summaries[c]['annualized_pct'],'max_drawdown_pct':summaries[c]['max_drawdown_pct'],'win_rate_pct':win[c],'closed_cycles':closed[c],'ending_equity':summaries[c]['ending_equity']} for c in ('P19','P35','P40')]
-    watch=rows(a.lab/'paper_etf_dual'/'model_watchlist.csv');event_rows={x['id']:x for x in rows(stage3/'events.csv')};stocks={};strategy_holdings={'P19':[],'P35':[]};holding_age={}
-    for plan in ('P19','P35'):
-        history=rows(stage3/plan/'holdings.csv');plan_asof=max(x['date'] for x in history)
+    watch=rows(a.lab/'paper_etf_dual'/'model_watchlist.csv');event_rows={x['id']:x for x in rows(stage3/'events.csv')};stocks={};strategy_holdings={'P19':[],'P35':[],'P40':[]};holding_age={}
+    for plan,base in (('P19',stage3),('P35',stage3),('P40',stage4)):
+        history=rows(base/plan/'holdings.csv');plan_asof=max(x['date'] for x in history)
         for current in (x for x in history if x['date']==plan_asof):
             episode=[x for x in history if x['stock']==current['stock'] and x['entry_index']==current['entry_index']]
             entry_date=min(x['date'] for x in episode);sessions=len({x['date'] for x in episode})
             shares=float(current['shares']);cost=float(current['cost']);market=float(current['market_value'])
-            holding_age[(plan,current['stock'])]={'entry_date':entry_date,'holding_sessions':sessions,'holding_calendar_days':(date.fromisoformat(plan_asof)-date.fromisoformat(entry_date)).days+1,'cost':cost,'avg_cost':cost/shares if shares else 0,'mark':float(current['mark']),'market_value':market,'unrealized_pnl':market-cost,'unrealized_return_pct':100*(market/cost-1) if cost else 0}
+            holding_age[(plan,current['stock'])]={'entry_date':entry_date,'holding_sessions':sessions,'holding_calendar_days':(date.fromisoformat(plan_asof)-date.fromisoformat(entry_date)).days+1,'score':float(current['score'] or 0),'cost':cost,'avg_cost':cost/shares if shares else 0,'mark':float(current['mark']),'market_value':market,'unrealized_pnl':market-cost,'unrealized_return_pct':100*(market/cost-1) if cost else 0}
     for w in watch:
         code=w['stock'];event=next((e for e in event_rows.values() if e['stock']==code and e['date']==w['source_signal']),None) or {}
         item=stocks.setdefault(code,{'stock':code,'name':clean_name(companies.get(code),code),'plans':[],'score':float(w['score'] or 0),'market_value':0.,'signal_date':w['source_signal'],'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') else None,'brokers':[]})
@@ -46,6 +46,13 @@ def main():
             item['brokers']=[{'code':b,'name':clean_name(names.get(b),'分點 '+b),'weight':v} for b,v in json.loads(event['brokers']).items()]
         age=holding_age.get((w['plan'],code),{})
         strategy_holdings[w['plan']].append({'plan':w['plan'],'stock':code,'name':clean_name(companies.get(code),code),'score':float(w['score'] or 0),'shares':float(w['historical_model_shares']),'mark':age.get('mark',float(w['mark'])),'cost':age.get('cost',0),'avg_cost':age.get('avg_cost',0),'market_value':age.get('market_value',float(w['historical_model_shares'])*float(w['mark'])),'unrealized_pnl':age.get('unrealized_pnl',0),'unrealized_return_pct':age.get('unrealized_return_pct',0),'signal_date':w['source_signal'],'entry_date':age.get('entry_date'),'holding_sessions':age.get('holding_sessions',0),'holding_calendar_days':age.get('holding_calendar_days',0),'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') else None,'brokers':item['brokers']})
+    p40_account=load(stage4/'P40'/'paper_account.json')
+    for code,position in p40_account['positions'].items():
+        event=position['event'];age=holding_age[('P40',code)];name=clean_name(event.get('name') or companies.get(code),code)
+        broker_list=[{'code':b,'name':clean_name(names.get(b),'分點 '+b),'weight':v} for b,v in event.get('brokers',{}).items()]
+        item=stocks.setdefault(code,{'stock':code,'name':name,'plans':[],'score':float(age.get('score',0)),'market_value':0.,'signal_date':event['date'],'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') is not None else None,'brokers':broker_list})
+        item['plans'].append('P40');item['market_value']+=age['market_value'];item['score']=max(item['score'],float(age.get('score',0)))
+        strategy_holdings['P40'].append({'plan':'P40','stock':code,'name':name,'score':float(age.get('score',0)),'shares':float(position['shares']),'mark':age['mark'],'cost':age['cost'],'avg_cost':age['avg_cost'],'market_value':age['market_value'],'unrealized_pnl':age['unrealized_pnl'],'unrealized_return_pct':age['unrealized_return_pct'],'signal_date':event['date'],'entry_date':age['entry_date'],'holding_sessions':age['holding_sessions'],'holding_calendar_days':age['holding_calendar_days'],'broker_9359_amount':float(event.get('broker_9359_amount') or 0),'listing_age':int(float(event['listing_age'])) if event.get('listing_age') is not None else None,'brokers':broker_list})
     ranks=rows(stage4/'rank_history.csv');latest=max(x['effective_date'] for x in ranks if x['effective_date']);brokers=[]
     for x in ranks:
         if x['effective_date']!=latest:continue
@@ -57,8 +64,8 @@ def main():
     for code in sorted(set(p19)&set(p35)):
         common.append({'stock':code,'name':p19[code]['name'],'P19':p19[code],'P35':p35[code]})
     portfolio_overview={}
-    for plan in ('P19','P35'):
-        account=load(stage3/plan/'paper_account.json');holdings=strategy_holdings[plan];position_cost=sum(x['cost'] for x in holdings);market_value=sum(x['market_value'] for x in holdings);receivables=sum(float(x[1]) for x in account.get('receivables',[]));equity=float(account['cash'])+receivables+market_value
+    for plan,base in (('P19',stage3),('P35',stage3),('P40',stage4)):
+        account=load(base/plan/'paper_account.json');holdings=strategy_holdings[plan];position_cost=sum(x['cost'] for x in holdings);market_value=sum(x['market_value'] for x in holdings);receivables=sum(float(x[1]) for x in account.get('receivables',[]));equity=float(account['cash'])+receivables+market_value
         portfolio_overview[plan]={'equity':equity,'total_return_pct':100*(equity/300000-1),'cash':float(account['cash']),'receivables':receivables,'position_cost':position_cost,'market_value':market_value,'unrealized_pnl':market_value-position_cost,'unrealized_return_pct':100*(market_value/position_cost-1) if position_cost else 0,'positions':len(holdings)}
     data={'as_of':asof,'rank_effective_date':latest,'paper_status':'等待截止日後的新訊號','strategies':strategies,'stocks':sorted(stocks.values(),key=lambda x:(-x['score'],x['stock'])),'strategy_holdings':strategy_holdings,'common_holdings':common,'portfolio_overview':portfolio_overview,'brokers':brokers,
       'featured_brokers':[{'code':'9359','name':'華南永昌-中正','roster_status':'資金確認分點・不等同前60名','role':'共同新建倉出現時，作為外部資金確認；不是共同建倉發起者，也不以其單獨賣超機械出場。','p19_basis':'訊號日金額階梯','p35_basis':'後1–5日首次轉買','caveat':'分點彙總'}],

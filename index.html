@@ -38,14 +38,14 @@
   <main>
     <section id="overview" class="view active">
       <div class="hero">
-        <div><p class="eyebrow">EMERGING MARKET INTELLIGENCE</p><h1>先找共同新建倉，<br><em>再等資金確認。</em></h1><p class="lede">兩套30萬元紙上帳戶，追蹤RACE共同新建倉與9359資金訊號。歷史模型、紙上決策與真正新訊號分開呈現。</p></div>
+        <div><p class="eyebrow">EMERGING MARKET INTELLIGENCE</p><h1>先找共同新建倉，<br><em>再等資金確認。</em></h1><p class="lede">P19、P35與P40三套策略分開呈現；P40為100%歷史勝率研究候選。歷史模型、紙上決策與真正新訊號分開呈現。</p></div>
         <div class="hero-orbit"><div class="orbit o1"></div><div class="orbit o2"></div><div class="core"><span>9359</span><small>資金確認</small></div></div>
       </div>
       <div id="status-banner" class="banner"></div>
       <div id="strategy-cards" class="strategy-grid"></div>
       <div class="grid two">
         <article class="panel"><div class="panel-head"><div><span class="kicker">CURRENT MODEL</span><h2>目前模型持股</h2></div><span class="tag muted">觀察用・禁止追價</span></div><div id="overview-holdings"></div></article>
-        <article class="panel"><div class="panel-head"><div><span class="kicker">RESEARCH SIGNAL</span><h2>策略關係</h2></div></div><div class="flow"><div><b>共同新建倉</b><small>至少2個合格分點</small></div><i>→</i><div><b>P19</b><small>訊號日直接評分</small></div><i>／</i><div><b>P35</b><small>後1–5日等9359</small></div><i>→</i><div><b>T+1</b><small>容量合格才成交</small></div></div><div class="notice">P40「第一日快速確認」只作研究標籤，樣本不足，不配置獨立帳戶。</div></article>
+        <article class="panel"><div class="panel-head"><div><span class="kicker">RESEARCH SIGNAL</span><h2>策略關係</h2></div></div><div class="flow"><div><b>共同新建倉</b><small>至少2個合格分點</small></div><i>→</i><div><b>P19</b><small>訊號日直接評分</small></div><i>／</i><div><b>P35</b><small>後1–5日等9359</small></div><i>／</i><div><b>P40</b><small>只等第1日9359</small></div></div><div class="notice">P40已獨立顯示歷史模型帳戶與持股，但仍是6筆完整平倉的研究候選。</div></article>
       </div>
     </section>
 
@@ -54,7 +54,8 @@
       <div id="portfolio-summary" class="portfolio-summary"></div>
       <div class="holding-section"><div class="section-label"><span>P19</span><h2>訊號日資金加分持倉</h2><b id="p19-count"></b></div><div id="p19-stock-grid" class="stock-grid"></div></div>
       <div class="holding-section"><div class="section-label"><span>P35</span><h2>9359後續確認持倉</h2><b id="p35-count"></b></div><div id="p35-stock-grid" class="stock-grid"></div></div>
-      <div class="holding-section common-section"><div class="section-label"><span>OVERLAP</span><h2>兩策略共同持有</h2><b id="common-count"></b></div><div id="common-stock-grid" class="stock-grid"></div></div>
+      <div class="holding-section"><div class="section-label"><span>P40</span><h2>第一日9359快速確認持倉・研究候選</h2><b id="p40-count"></b></div><div class="perfect-warning">歷史完整平倉6次皆獲利，但樣本不足；此區獨立顯示，不與P19／P35帳戶混算。</div><div id="p40-stock-grid" class="stock-grid"></div></div>
+      <div class="holding-section common-section"><div class="section-label"><span>OVERLAP</span><h2>P19／P35共同持有</h2><b id="common-count"></b></div><div id="common-stock-grid" class="stock-grid"></div></div>
     </section>
 
     <section id="brokers" class="view">
@@ -76,7 +77,7 @@
 
     <section id="guide" class="view">
       <div class="page-title"><div><span class="kicker">USER PLAYBOOK</span><h1>每日操作手冊</h1><p>使用者只執行網站明列的新指令，不自行猜測，也不追買歷史模型持股。</p></div><span class="tag warn">紙上追蹤階段</span></div>
-      <div class="guide-alert"><b>目前可操作策略只有兩套：</b>P19負責廣泛掌握共同新建倉；P35等待9359後續確認。P40及其他編號只供研究，不建立獨立帳戶。</div>
+      <div class="guide-alert"><b>目前顯示三套策略：</b>P19掌握共同新建倉；P35等待9359後續確認；P40只接受第1日9359確認，目前仍是6筆平倉的研究候選。</div>
       <div class="guide-steps">
         <article class="guide-step"><span>01</span><div><h3>每天盤後更新</h3><p>官方興櫃資料完成後更新網站。先確認頁首資料日期是最新市場交易日；日期落後就不產生新委託。</p></div></article>
         <article class="guide-step"><span>02</span><div><h3>只看「新指令」</h3><p>歷史模型持股標示「觀察用・禁止追價」。只有狀態為「明日買進」「明日賣出」的股票才是下一交易日紙上指令。</p></div></article>
@@ -87,6 +88,7 @@
       <div class="grid two">
         <article class="panel playbook p19"><div class="panel-head"><div><span class="kicker">P19</span><h2>訊號日資金加分</h2></div><span class="tag">主對照</span></div><ol><li>同股同日至少兩個合格分點共同新建倉。</li><li>股票總分至少70分。</li><li>9359訊號日買超依金額增加0～25分。</li><li>依總分排序，有空席才建立明日買進。</li><li>不要求9359一定有買；它是加分，不是硬門檻。</li></ol></article>
         <article class="panel playbook p35"><div class="panel-head"><div><span class="kicker">P35</span><h2>後續資金確認</h2></div><span class="tag">主要挑戰者</span></div><ol><li>共同新建倉當日先放進等待池。</li><li>只觀察後續第1～5個市場交易日。</li><li>9359首次正淨買即確認，不設100萬元門檻。</li><li>確認日盤後重算分數與容量，最快隔日買進。</li><li>第五日仍未確認，該次訊號失效。</li></ol></article>
+        <article class="panel playbook"><div class="panel-head"><div><span class="kicker">P40</span><h2>第一日快速確認</h2></div><span class="tag warn">研究候選</span></div><ol><li>先出現RACE共同新建倉。</li><li>只檢查訊號後第1個市場交易日。</li><li>該日9359正淨買才確認候選。</li><li>最快再下一交易日依容量模型買進。</li><li>目前6次完整平倉、歷史勝率100%；未累積20筆前不得視為穩定策略。</li></ol></article>
       </div>
       <article class="panel sizing"><div class="panel-head"><div><span class="kicker">POSITION SIZING</span><h2>30萬元如何配置</h2></div></div><div class="sizing-grid"><div><small>初始本金</small><b>300,000</b></div><div><small>最多持股</small><b>5 檔</b></div><div><small>單檔上限</small><b>19%</b></div><div><small>初始單檔約</small><b>57,000</b></div><div><small>現金底線</small><b>5%</b></div></div><p class="copy">實際買進預算取「淨值19%」與可用現金的較小值，並包含買進費用。訊號日與成交日的容量都不能超過成交額0.5%，且必須能完成至少80%目標部位；不足就跳過，不追價補滿。</p></article>
       <article class="panel exit-rules"><div class="panel-head"><div><span class="kicker">SELL & REPLACE</span><h2>何時賣出或換股</h2></div></div><div class="rule-grid"><div><b>出貨退出</b><p>持股總分低於40，而且全體加權主力連續兩日淨賣，於下一交易日賣出。</p></div><div><b>分差換股</b><p>新候選比最低分持股高至少15分，且同一新舊配對連續兩日成立；原持股至少持有5日。</p></div><div><b>不得單獨跟賣9359</b><p>9359單日賣超或推估庫存下降不構成機械賣點；研究顯示這會過早賣掉右尾大贏家。</p></div><div><b>冷卻與轉板</b><p>完全出清後冷卻20個市場交易日；轉板研究按最後興櫃收盤價結算。</p></div></div></article>
