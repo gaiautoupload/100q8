@@ -28,8 +28,8 @@ def main():
     summaries={}
     for code,base in [('P19',stage4),('P35',stage4),('P40',stage4)]:
         s=load(base/code/'summary.json');annual=rows(base/code/'annual.csv');s['annualized_pct']=float(annual[-1]['return_pct']);summaries[code]=s
-    win={'P19':46.1538461538,'P35':56.25,'P40':100.0}
-    strategies=[{'code':c,'name':desc[c][0],'rule':desc[c][1],'status':desc[c][2],'return_pct':summaries[c]['return_pct'],'annualized_pct':summaries[c]['annualized_pct'],'max_drawdown_pct':summaries[c]['max_drawdown_pct'],'win_rate_pct':win[c],'ending_equity':summaries[c]['ending_equity']} for c in ('P19','P35','P40')]
+    win={'P19':46.1538461538,'P35':56.25,'P40':100.0};closed={'P19':39,'P35':16,'P40':6}
+    strategies=[{'code':c,'name':desc[c][0],'rule':desc[c][1],'status':desc[c][2],'return_pct':summaries[c]['return_pct'],'annualized_pct':summaries[c]['annualized_pct'],'max_drawdown_pct':summaries[c]['max_drawdown_pct'],'win_rate_pct':win[c],'closed_cycles':closed[c],'ending_equity':summaries[c]['ending_equity']} for c in ('P19','P35','P40')]
     watch=rows(a.lab/'paper_etf_dual'/'model_watchlist.csv');event_rows={x['id']:x for x in rows(stage3/'events.csv')};stocks={};strategy_holdings={'P19':[],'P35':[]};holding_age={}
     for plan in ('P19','P35'):
         history=rows(stage3/plan/'holdings.csv');plan_asof=max(x['date'] for x in history)
