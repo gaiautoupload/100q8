@@ -52,6 +52,7 @@
     <section id="stocks" class="view">
       <div class="page-title"><div><span class="kicker">STOCK TRACKER</span><h1>股票追蹤</h1><p>搜尋代號或名稱，查看策略、總分、共同建倉分點與9359確認狀態。</p></div><input id="stock-search" type="search" placeholder="搜尋股票代號或名稱…"></div>
       <div id="portfolio-summary" class="portfolio-summary"></div>
+      <article class="panel"><h2>轉板補充結算</h2><p id="settlement-note"></p><div id="transfer-settlements"></div><p>P40出場：分數低於40且連續兩日加權淨賣，隔日執行；轉板依興櫃最後成交價做研究結算。9359單日賣超不是直接出場條件。</p></article>
       <div class="holding-section"><div class="section-label"><span>P19</span><h2>訊號日資金加分持倉</h2><b id="p19-count"></b></div><div id="p19-stock-grid" class="stock-grid"></div></div>
       <div class="holding-section"><div class="section-label"><span>P35</span><h2>9359後續確認持倉</h2><b id="p35-count"></b></div><div id="p35-stock-grid" class="stock-grid"></div></div>
       <div class="holding-section"><div class="section-label"><span>P40</span><h2>第一日9359快速確認持倉・研究候選</h2><b id="p40-count"></b></div><div class="perfect-warning">歷史完整平倉6次皆獲利，但樣本不足；此區獨立顯示，不與P19／P35帳戶混算。</div><div id="p40-stock-grid" class="stock-grid"></div></div>
