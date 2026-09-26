@@ -1,17 +1,32 @@
-function renderChampion(data){
- const c=data.champion;if(!c)return;
+function renderChampion(data,mode='paper'){
+ const root=data.champion;if(!root)return;const c=mode==='paper'?root.paper:root;if(!c)return;
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  const number=n=>Number(n).toLocaleString('zh-TW',{maximumFractionDigits:0}),percent=n=>`${Number(n)>=0?'+':''}${Number(n).toFixed(2)}%`;
  const reason=r=>({admit:'共同新建倉・評分與容量合格',research_support30:'原建倉者庫存低於高點70%・連續2日',distribution:'分數低於40且連續2日加權淨賣',emerging_last_close_settlement:'轉板結算'}[r]||(r.startsWith('replace:')?'分差換股 → '+r.slice(8):r));
  const old=(Date.now()-Date.parse(c.as_of+'T00:00:00+08:00'))/86400000>4;
- el('champion-status').textContent=`模型資料 ${c.as_of}｜${old?'資料落後，暫停依此建立新委託；請等待更新。':'依最新可用官方資料重播，請先核對日期再操作。'} 其他策略日期請看各頁標示。`;el('champion-status').classList.toggle('data-warning',old);
- el('champion-metrics').innerHTML=[['模型淨值',number(c.account.equity)+'元'],['累積報酬',percent(c.summary.return_pct)],['最大回撤',percent(c.summary.max_drawdown_pct)],['持股／現金',c.account.positions+'檔 / '+number(c.account.cash)+'元']].map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('');
+ el('champ-account').value=mode;el('champ-account').onchange=e=>renderChampion(data,e.target.value);
+ el('champion-status').textContent=`資料截至 ${c.as_of}｜${mode==='paper'?'新帳戶自 '+c.start+' 起以10萬元現金追蹤。':'歷史10萬元重新回測，舊持倉不可當作新帳戶買單。'} ${old?'資料落後，暫停新委託。':'每日19:15更新；請確認自己的庫存與此帳戶一致。'}`;el('champion-status').classList.toggle('data-warning',old);
+ el('champion-metrics').innerHTML=[['初始本金',number(c.capital)+'元'],['可用現金',number(c.account.cash)+'元'],['帳戶淨值',number(c.account.equity)+'元'],['累積報酬',percent(c.summary.return_pct)]].map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('');
  const orderCard=(o,pending=false)=>`<details class="order-card"><summary><strong class="${o.side==='buy'?'buy-label':'sell-label'}">${o.side==='buy'?'↑ 買進':'↓ 賣出'}</strong> ${esc(o.stock)} ${esc(c.names[o.stock]||'')}<br><small>決策 ${esc(o.signal_date)} · ${pending?'待執行／持續等待':o.fills?.length?'有模型成交':'未有成交'}</small></summary><p>${esc(reason(o.reason))}</p><p>${o.side==='buy'?'預算上限 '+number(o.budget)+' 元':'委託股數 '+(o.quantity?number(o.quantity):'退出剩餘部位')}；最早決策日的下一市場交易日。</p>${(o.fills||[]).map(f=>`<p>${esc(f.date)}：${number(f.shares)} 股 × ${Number(f.price).toFixed(2)}元</p>`).join('')}${(o.attempts||[]).map(a=>`<p>${esc(a.date)}：${esc(({filled:'完成',partial:'部分成交',no_quote:'無可用行情',no_slot:'無空席',no_capacity:'容量不足',no_cash:'資金不足'})[a.status]||a.status)}</p>`).join('')}</details>`;
- el('champ-pending').innerHTML=c.pending.length?c.pending.map(p=>orderCard(p,true)).join(''):'<div class="banner">最新資料日沒有待執行指令。等待下一次評分；不代表每天都需要買賣。</div>';
+ const pending=[...c.pending].sort((a,b)=>(a.side!=='sell')-(b.side!=='sell')||a.stock.localeCompare(b.stock));
+ const buys=pending.filter(o=>o.side==='buy'),sells=pending.filter(o=>o.side==='sell'),keep=c.holdings.filter(h=>!sells.some(o=>o.stock===h.stock));
+ const waiting=mode==='paper'&&c.as_of<c.start;
+ el('daily-brief').textContent=old?'暫停新委託：先等待資料更新。':waiting?'目前不用下單。10萬元新帳戶尚未遇到啟用後的交易日資料，等待新訊號；不追買歷史持股。':pending.length?`下一交易日：${sells.length}檔待賣、${buys.length}檔待買；${keep.length}檔續抱。`:`下一交易日不用新增委託。${keep.length?keep.length+'檔繼續持有。':'保留現金，等待合格共同新建倉。'}`;
+ const action=o=>`<article class="order-card"><h3 class="${o.side==='buy'?'buy-label':'sell-label'}">${o.side==='sell'?'① 賣出':'② 買進'} ${esc(o.stock)} ${esc(c.names[o.stock]||'')}</h3><p>${esc(reason(o.reason))}</p><div class="detail-list"><div class="detail"><span>${o.side==='buy'?'預算上限（含費用）':'待賣股數'}</span><b>${o.side==='buy'?number(o.budget)+'元':number(o.estimated_shares)+'股'}</b></div><div class="detail"><span>參考股數／最近價</span><b>${o.estimated_shares==null?'待行情':number(o.estimated_shares)+'股'}／${o.reference_price?Number(o.reference_price).toFixed(2)+'元':'缺價'}</b></div></div><p>決策日 ${esc(o.signal_date)}；最早下一市場交易日。${o.side==='buy'?'當天未成交就取消，不自行追價；隔日重新看清單。':'未賣完仍占席位，後續繼續列出剩餘部位。'}</p>${orderCard(o,true)}</article>`;
+ el('champ-pending').innerHTML=(sells.length?sells.map(action).join(''):'<div class="order-card"><h3>① 賣出</h3><p>沒有待賣指令。</p></div>')+(buys.length?buys.map(action).join(''):'<div class="order-card"><h3>② 買進</h3><p>沒有待買指令，保留現金。</p></div>');
+ el('keep-holdings').innerHTML='<h3>③ 繼續持有</h3>'+(keep.length?keep.map(h=>`<p>${esc(h.stock)} ${esc(h.name)} · ${number(h.shares)}股 · 本日無賣出指令</p>`).join(''):'<p>目前沒有需要續抱的持股。</p>');
+ const planText=[`100Q8 ${mode==='paper'?'10萬元新帳戶':'歷史模型'}｜資料 ${c.as_of}`,el('daily-brief').textContent,`可用現金 ${number(c.account.cash)}元；待交割 ${number(c.account.receivable)}元`,...pending.map(o=>`${o.side==='buy'?'買進':'賣出'} ${o.stock} ${c.names[o.stock]||''}：${o.side==='buy'?'預算上限'+number(o.budget)+'元（含費用）':'待售'+number(o.estimated_shares)+'股'}；參考${o.estimated_shares??'待行情'}股；${reason(o.reason)}`),...keep.map(h=>`續抱 ${h.stock} ${h.name} ${number(h.shares)}股`),'最早訊號下一市場交易日；依實際報價重算股數，買單未成交當日取消。'].join('\n');
+ const reviewKey='q8-reviewed-'+mode+'-'+c.version;
+ el('plan-feedback').textContent=localStorage.getItem(reviewKey)?'已閱讀本版清單（不代表成交）':'';
+ el('review-plan').onclick=()=>{localStorage.setItem(reviewKey,'1');el('plan-feedback').textContent='已閱讀本版清單（不代表成交）'};
+ el('copy-plan').onclick=async()=>{try{await navigator.clipboard.writeText(planText);el('plan-feedback').textContent='已複製，可貼到你的每日筆記。'}catch{el('plan-feedback').textContent='瀏覽器未允許複製，請直接參照清單。'}};
  el('champ-holdings').innerHTML=c.holdings.map(h=>`<article class="stock-card"><div class="stock-code">${esc(h.stock)} · ${esc(h.name)}</div><h2>${percent(h.return_pct)}</h2><p>未實現 ${number(h.pnl)}元</p><div class="detail-list">${[['持股',number(h.shares)+'股'],['成本／現價',h.avg_cost.toFixed(2)+'／'+h.mark.toFixed(2)],['市值',number(h.market_value)+'元'],['進場',h.entry_date],['持有',h.holding_sessions+'交易日／'+h.calendar_days+'曆日'],['分數',h.score.toFixed(1)]].map(([k,v])=>`<div class="detail"><span>${k}</span><b>${v}</b></div>`).join('')}</div>${h.stale_sessions?'<p>估值行情落後 '+h.stale_sessions+'交易日</p>':''}</article>`).join('')||'<p>目前留現金。</p>';
  el('champ-date').innerHTML='<option value="all">所有日期（最新優先）</option>'+c.dates.map(d=>`<option>${d}</option>`).join('');
  function history(){const date=el('champ-date').value,side=el('champ-side').value,orders=c.orders.filter(o=>(date==='all'||o.signal_date===date)&&(side==='all'||o.side===side));el('champ-count').textContent=`${orders.length}筆決策・點擊卡片查看成交及原因`;el('champ-orders').innerHTML=orders.map(o=>orderCard(o)).join('')||'<div class="banner">此篩選沒有紀錄。</div>'}
  el('champ-date').onchange=history;el('champ-side').onchange=history;history();
  document.querySelectorAll('[data-champ]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-champ]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('.champ-pane').forEach(x=>x.hidden=x.id!=='champ-'+b.dataset.champ)});
+ document.querySelector('[data-champ="action"]').click();
+ el('champ-rules').querySelector('h3').textContent='30萬元歷史研究基準（非10萬元新帳戶）';
+ if(!location.hash)document.querySelector('[data-view="champion"]').click();
 }
 window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);const b=[...document.querySelectorAll('nav button[data-view]')].find(x=>x.dataset.view===id);if(b&&!b.classList.contains('active'))b.click()});
