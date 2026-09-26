@@ -4,6 +4,7 @@ import argparse,csv,json
 from pathlib import Path
 from datetime import date
 from transfer_adjustments import apply as apply_transfers
+from champion_export import export as export_champion
 
 def rows(path):
     with path.open(encoding='utf-8-sig',newline='') as f:return list(csv.DictReader(f))
@@ -73,5 +74,6 @@ def main():
       'formula':{'stock_score':[{'name':'淨買強度','points':30,'detail':'當日與近3日加權淨買／成交額百分位'},{'name':'買方共識','points':20,'detail':'淨買分點權重占買賣雙方權重'},{'name':'持續買進','points':20,'detail':'近5日加權淨買為正天數比例'},{'name':'原建倉者支持','points':20,'detail':'原始分點現存推估庫存／高點'},{'name':'賣壓控制','points':10,'detail':'近3日加權賣出金額反向比例'}], 'money_tiers':[{'amount':'100萬','points':5},{'amount':'300萬','points':10},{'amount':'600萬','points':15},{'amount':'1,000萬','points':20},{'amount':'2,000萬','points':25}]},
       'limitations':['所有交易均為紙上研究，並非實際成交或報酬保證。','分點能力只使用當時已成熟事件；至少10件、5檔股票才入選。','推估庫存來自券商分點交易流，不是官方公布的單一投資人持股。','公司行動、股利及歷史轉板事件尚未全量核實。','T+1日均價、滑價及成交容量皆為保守代理，不能保證實際成交。']}
     apply_transfers(data, config['raw_root'])
+    data['champion']=export_champion(a.lab)
     a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps({'output':str(a.output),'as_of':asof,'strategies':len(strategies),'stocks':len(data['stocks']),'brokers':len(brokers)},ensure_ascii=False))
 if __name__=='__main__':main()

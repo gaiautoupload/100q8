@@ -1,9 +1,10 @@
 import {createCipheriv,createHash,randomBytes} from 'node:crypto';
-import {readFileSync,writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 const passwords=(process.env.Q8_PASSWORDS||'').split(';').filter(Boolean);
 if(!passwords.length)throw new Error('Set Q8_PASSWORDS with semicolon-separated passwords');
 const source=readFileSync('data/dashboard.json');
 const dataVersion=createHash('sha256').update(source).digest('hex').slice(0,16);
+if(existsSync('data/dashboard.secure.json') && JSON.parse(readFileSync('data/dashboard.secure.json','utf8')).data_version===dataVersion){console.log('Dashboard unchanged');process.exit(0)}
 const envelopes=passwords.map(password=>{
   const key=createHash('sha256').update(password).digest();const iv=randomBytes(12);
   const cipher=createCipheriv('aes-256-gcm',key,iv);const encrypted=Buffer.concat([cipher.update(source),cipher.final(),cipher.getAuthTag()]);

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="private.css">
   <link rel="stylesheet" href="returns.css">
+  <link rel="stylesheet" href="mobile.css?v=20260926">
 </head>
 <body class="locked">
   <div class="noise"></div>
@@ -27,6 +28,7 @@
     <a class="brand" href="#overview"><span class="brand-mark">Q8</span><span>RACE <b>100Q8</b></span></a>
     <nav>
       <button data-view="overview" class="active">策略總覽</button>
+      <button data-view="champion">優選策略</button>
       <button data-view="stocks">股票追蹤</button>
       <button data-view="brokers">分點排行</button>
       <button data-view="method">評分方法</button>
@@ -36,6 +38,16 @@
   </header>
 
   <main>
+    <section id="champion" class="view">
+      <div class="page-title"><span class="kicker">P19 · SUPPORT 30</span><h1>讓贏家跑，主力退就走</h1><p>本輪最高歷史報酬候選 · 獨立模型帳戶</p></div>
+      <div id="champion-status" class="banner" role="status"></div>
+      <div id="champion-metrics" class="champion-metrics"></div>
+      <div class="segmented" role="group" aria-label="策略內容"><button data-champ="action" aria-pressed="true">進出指令</button><button data-champ="hold" aria-pressed="false">持倉</button><button data-champ="history" aria-pressed="false">歷史紀錄</button><button data-champ="rules" aria-pressed="false">怎麼操作</button></div>
+      <div id="champ-action" class="champ-pane"><h2>最新資料日的待執行指令</h2><p class="copy">模型續跑帳戶；買進最早訊號隔日，賣出未完成持續列出。不是券商實際委託。</p><div id="champ-pending"></div></div>
+      <div id="champ-hold" class="champ-pane" hidden><h2>獨立持倉</h2><div id="champ-holdings" class="stock-grid"></div></div>
+      <div id="champ-history" class="champ-pane" hidden><h2>逐日進出紀錄</h2><label for="champ-date">決策日期</label><select id="champ-date"></select><label for="champ-side">方向</label><select id="champ-side"><option value="all">全部</option><option value="buy">買進</option><option value="sell">賣出</option></select><p id="champ-count" role="status"></p><div id="champ-orders"></div></div>
+      <div id="champ-rules" class="champ-pane" hidden><article class="panel"><h2>買進與退出</h2><ol><li>RACE共同新建倉，P19評分至少70分；9359訊號日資金分級加分。</li><li>最多5檔，買進預算不超過淨值19%，現金保留5%；同股持有期間不重複建倉。</li><li>原建倉分點合計推估庫存降至高點70%以下，連續2日成立，隔日賣出。</li><li>保留原版出貨退出與分差換股：低於40分且連兩日加權淨賣；或新股高15分、同一配對連2日成立且舊股持有至少5日。</li><li>買單未成交當日取消；賣单未完成继续等待，實際價格及股數以成交紀錄為準。模型賣款T+2可用。</li></ol><h3>研究基準</h3><p>2025/9/19～2026/9/18回測+150.85%、回撤−22.32%。每邊1%滑價為+60.27%，整張限制為+44.05%。這些是固定歷史比較；上方帳戶數字隨每日重播更新。</p></article></div>
+    </section>
     <section id="overview" class="view active">
       <div class="hero">
         <div><p class="eyebrow">EMERGING MARKET INTELLIGENCE</p><h1>先找共同新建倉，<br><em>再等資金確認。</em></h1><p class="lede">P19、P35與P40三套策略分開呈現；P40為100%歷史勝率研究候選。歷史模型、紙上決策與真正新訊號分開呈現。</p></div>
@@ -97,6 +109,7 @@
     </section>
   </main>
   <footer><span>100Q8 · RACE Emerging Five</span><span>靜態研究儀表板，不構成投資建議</span></footer>
-  <script src="app.js"></script>
+  <script src="champion.js?v=20260926"></script>
+  <script src="app.js?v=20260926"></script>
 </body>
 </html>
