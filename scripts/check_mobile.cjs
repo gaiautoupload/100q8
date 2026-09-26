@@ -4,7 +4,7 @@ const {chromium}=require('playwright');
  for(const width of [360,390,768,1440]){
   const page=await browser.newPage({viewport:{width,height:844},isMobile:width<700,hasTouch:width<700});
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto('http://127.0.0.1:8765/#champion');
+  await page.goto((process.env.Q8_TEST_URL||'http://127.0.0.1:8765/')+'#champion');
   await page.locator('#site-password').fill(process.env.Q8_PASSWORDS.split(';')[0]);await page.locator('#unlock-form button').click();
   await page.locator('#champion.active').waitFor();await page.locator('#champion-metrics b').first().waitFor();
   await page.locator('[data-champ="hold"]').click();await page.locator('#champ-hold:not([hidden])').waitFor();
