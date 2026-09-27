@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
   const page=await browser.newPage({viewport:{width,height:844},isMobile:width<700,hasTouch:width<700});
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   await page.goto((process.env.Q8_TEST_URL||'http://127.0.0.1:8765/')+'#champion');
-  await page.locator('#site-password').fill(process.env.Q8_PASSWORDS.split(';')[0]);await page.locator('#unlock-form button').click();
+  await page.locator('#site-password').fill(process.env.Q8_PASSWORDS.split(';')[0]);await page.locator('#unlock-form button[type="submit"]').click();
   await page.locator('#champion.active').waitFor();await page.locator('#champion-metrics b').first().waitFor();
   if(await page.locator('#champ-account').inputValue()!=='paper')throw Error('New cash account must be default');
   if(!(await page.locator('#champion-metrics').innerText()).includes('100,000'))throw Error('Missing 100k capital');

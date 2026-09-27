@@ -17,8 +17,9 @@ function renderChampion(data,mode='paper'){
  el('keep-holdings').innerHTML='<h3>③ 繼續持有</h3>'+(keep.length?keep.map(h=>`<p>${esc(h.stock)} ${esc(h.name)} · ${number(h.shares)}股 · 本日無賣出指令</p>`).join(''):'<p>目前沒有需要續抱的持股。</p>');
  const planText=[`100Q8 ${mode==='paper'?'10萬元新帳戶':'歷史模型'}｜資料 ${c.as_of}`,el('daily-brief').textContent,`可用現金 ${number(c.account.cash)}元；待交割 ${number(c.account.receivable)}元`,...pending.map(o=>`${o.side==='buy'?'買進':'賣出'} ${o.stock} ${c.names[o.stock]||''}：${o.side==='buy'?'預算上限'+number(o.budget)+'元（含費用）':'待售'+number(o.estimated_shares)+'股'}；參考${o.estimated_shares??'待行情'}股；${reason(o.reason)}`),...keep.map(h=>`續抱 ${h.stock} ${h.name} ${number(h.shares)}股`),'最早訊號下一市場交易日；依實際報價重算股數，買單未成交當日取消。'].join('\n');
  const reviewKey='q8-reviewed-'+mode+'-'+c.version;
- el('plan-feedback').textContent=localStorage.getItem(reviewKey)?'已閱讀本版清單（不代表成交）':'';
- el('review-plan').onclick=()=>{localStorage.setItem(reviewKey,'1');el('plan-feedback').textContent='已閱讀本版清單（不代表成交）'};
+ let reviewed=false;try{reviewed=!!localStorage.getItem(reviewKey)}catch{}
+ el('plan-feedback').textContent=reviewed?'已閱讀本版清單（不代表成交）':'';
+ el('review-plan').onclick=()=>{try{localStorage.setItem(reviewKey,'1')}catch{}el('plan-feedback').textContent='已閱讀本版清單（不代表成交）'};
  el('copy-plan').onclick=async()=>{try{await navigator.clipboard.writeText(planText);el('plan-feedback').textContent='已複製，可貼到你的每日筆記。'}catch{el('plan-feedback').textContent='瀏覽器未允許複製，請直接參照清單。'}};
  el('champ-holdings').innerHTML=c.holdings.map(h=>`<article class="stock-card"><div class="stock-code">${esc(h.stock)} · ${esc(h.name)}</div><h2>${percent(h.return_pct)}</h2><p>未實現 ${number(h.pnl)}元</p><div class="detail-list">${[['持股',number(h.shares)+'股'],['成本／現價',h.avg_cost.toFixed(2)+'／'+h.mark.toFixed(2)],['市值',number(h.market_value)+'元'],['進場',h.entry_date],['持有',h.holding_sessions+'交易日／'+h.calendar_days+'曆日'],['分數',h.score.toFixed(1)]].map(([k,v])=>`<div class="detail"><span>${k}</span><b>${v}</b></div>`).join('')}</div>${h.stale_sessions?'<p>估值行情落後 '+h.stale_sessions+'交易日</p>':''}</article>`).join('')||'<p>目前留現金。</p>';
  el('champ-date').innerHTML='<option value="all">所有日期（最新優先）</option>'+c.dates.map(d=>`<option>${d}</option>`).join('');
@@ -28,5 +29,13 @@ function renderChampion(data,mode='paper'){
  document.querySelector('[data-champ="action"]').click();
  el('champ-rules').querySelector('h3').textContent='30萬元歷史研究基準（非10萬元新帳戶）';
  if(!location.hash)document.querySelector('[data-view="champion"]').click();
+}
+function renderLatestOverview(data){
+ const c=data.champion,p=c.paper;
+ const safe=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const n=x=>Number(x).toLocaleString('zh-TW',{maximumFractionDigits:0});
+ document.getElementById('latest-overview').innerHTML=`<p class="latest-date">優選策略資料截至 <b>${safe(c.as_of)}</b></p><div class="champion-metrics"><div><small>新帳戶可用現金</small><b>${n(p.account.cash)}元</b></div><div><small>新帳戶持股</small><b>${p.holdings.length}檔</b></div><div><small>歷史模型持股</small><b>${c.holdings.length}檔</b></div><div><small>歷史決策紀錄</small><b>${c.orders.length}筆</b></div></div><p>${p.holdings.length===0&&p.pending.length===0?'新帳戶自 '+safe(p.start)+' 起從10萬元現金開始，目前等待新訊號；零持股不是資料載入失敗。':'新帳戶的持倉與待執行指令已載入，請前往明日操作核對。'}</p><div class="plan-tools"><button id="open-new-account">看明日操作</button><button id="open-model">看歷史模型持股</button></div><h3>歷史模型追蹤中</h3><p class="copy">以下是已持有的研究部位，不是新帳戶買進清單。</p><div class="overview-stock-list">${c.holdings.map(h=>`<div><b>${safe(h.stock)} ${safe(h.name)}</b><span>${n(h.shares)}股 · ${Number(h.return_pct)>=0?'+':''}${Number(h.return_pct).toFixed(2)}%</span></div>`).join('')||'<p>歷史模型目前也無持倉。</p>'}</div><details><summary>查看資料範圍</summary><p>優選策略更新至${safe(c.as_of)}；下方P19／P35／P40原始研究摘要截至${safe(data.as_of)}。兩者期間與帳戶不同。</p></details>`;
+ document.getElementById('open-new-account').onclick=()=>{renderChampion(data,'paper');document.querySelector('[data-view="champion"]').click()};
+ document.getElementById('open-model').onclick=()=>{renderChampion(data,'model');document.querySelector('[data-view="champion"]').click();document.querySelector('[data-champ="hold"]').click()};
 }
 window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);const b=[...document.querySelectorAll('nav button[data-view]')].find(x=>x.dataset.view===id);if(b&&!b.classList.contains('active'))b.click()});
