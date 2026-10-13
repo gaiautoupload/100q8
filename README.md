@@ -1,5 +1,7 @@
 # 100Q8
 
+本機正式位置：`D:\codex\race\100q8`；研究及每日結果：`D:\codex\race\race-five-stock-lab`。每日排程與所有新增研究輸出以D槽為準。歷史provenance及日誌內的舊C槽路徑保留作當時執行紀錄；網站匯出按現在研究資料夾讀取，不依賴舊路徑。
+
 RACE興櫃五檔策略靜態追蹤站。GitHub Pages直接發布根目錄，不需要Node或後端服務。
 
 ## 更新資料

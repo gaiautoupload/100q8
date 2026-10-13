@@ -7,12 +7,12 @@ def rows(p):
 def export(lab):
     pointer=json.loads((lab/'champion_latest.json').read_text(encoding='utf-8'))
     from pathlib import Path
-    folder=Path(pointer['path'])
-    result=read_account(folder,pointer)
-    result['paper']=read_account(folder/'paper',pointer)
+    folder=lab/'champion_runs'/pointer['version']
+    result=read_account(folder,pointer,lab)
+    result['paper']=read_account(folder/'paper',pointer,lab)
     return result
 
-def read_account(folder,pointer):
+def read_account(folder,pointer,lab):
     daily=rows(folder/'daily.csv');history=rows(folder/'holdings.csv');asof=pointer['as_of']
     config=json.loads((folder/'config.json').read_text(encoding='utf-8'))
     events={e['id']:e for e in json.loads((folder/'events.json').read_text(encoding='utf-8'))}
@@ -30,7 +30,7 @@ def read_account(folder,pointer):
     pending=json.loads((folder/'pending.json').read_text(encoding='utf-8'))
     # Size estimates use only the latest known quote. Tomorrow's fill is unknown.
     import gzip
-    with gzip.open(__import__('pathlib').Path(config['source_cache'])/(asof+'.json.gz'),'rt',encoding='utf-8') as f:quotes=json.load(f)['quotes']
+    with gzip.open(lab/'data'/'champion_daily_v2'/(asof+'.json.gz'),'rt',encoding='utf-8') as f:quotes=json.load(f)['quotes']
     remaining_cash=float(account['cash'])
     for order in sorted(pending,key=lambda x:(x['side']!='sell',x['stock'])):
         held=next((h for h in holdings if h['stock']==order['stock']),None)
